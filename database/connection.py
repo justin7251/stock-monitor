@@ -1,14 +1,23 @@
-import sqlite3
+import mysql.connector
+from mysql.connector import Error
 from flask import g, current_app
 
 def get_db():
     """
-    Get or create a database connection
+    Get or create a MySQL database connection
     """
     if 'db' not in g:
-        # Use row_factory to allow column access by name
-        g.db = sqlite3.connect(current_app.config.get('DATABASE', 'stock_prices.db'))
-        g.db.row_factory = sqlite3.Row
+        try:
+            # Connect to MySQL database
+            g.db = mysql.connector.connect(
+                host=current_app.config.get('DB_HOST'),
+                user=current_app.config.get('DB_USER'),
+                password=current_app.config.get('DB_PASSWORD'),
+                database=current_app.config.get('DB_NAME')
+            )
+        except Error as e:
+            print(f"Error connecting to MySQL database: {e}")
+            raise
     return g.db
 
 def execute_db_query(query, params=None, fetch=False):
@@ -21,7 +30,7 @@ def execute_db_query(query, params=None, fetch=False):
     :return: Query results or None
     """
     db = get_db()
-    cursor = db.cursor()
+    cursor = db.cursor(dictionary=True)  # This makes fetchall return dictionaries instead of tuples
     
     try:
         if params:
@@ -32,12 +41,11 @@ def execute_db_query(query, params=None, fetch=False):
         db.commit()
         
         if fetch:
-            # Convert sqlite3.Row to list of dictionaries
-            return [dict(row) for row in cursor.fetchall()]
+            return cursor.fetchall()
         
         return None
     
-    except sqlite3.Error as e:
+    except Error as e:
         print(f"Database error: {e}")
         db.rollback()
         return None

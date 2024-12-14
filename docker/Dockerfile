@@ -1,4 +1,3 @@
-# Base Image
 FROM python:3.11-slim-bullseye
 
 # Maintainer Information
@@ -16,9 +15,9 @@ EXPOSE 5000
 # Set Work Directory
 WORKDIR $APP_HOME
 
-# Install system dependencies
+# Install system dependencies including MySQL client
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    cron gcc build-essential \
+    cron gcc build-essential default-libmysqlclient-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -30,7 +29,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Configure Cron Job
-# Copy cron job script
 COPY cron_jobs/cron_script.sh /etc/cron.hourly/
 RUN chmod +x /etc/cron.hourly/cron_script.sh
 
@@ -40,7 +38,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin\n\
 # Run cron job every hour\n\
 0 * * * * /bin/bash /etc/cron.hourly/cron_script.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/my-cron
 
-# Apply cron job
 RUN crontab /etc/cron.d/my-cron
 
 # Start cron and Flask app

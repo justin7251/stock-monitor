@@ -1,37 +1,37 @@
-from .connection import get_db
-import sqlite3
+from .connection import get_db  # Assuming get_db now returns a MySQL connection
+import mysql.connector
 
 def init_db():
     """
-    Initialize the database and create tables
+    Initialize the MySQL database and create tables
     """
     db = get_db()
     cursor = db.cursor()
-    
+
     # Create stocks table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS stocks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            symbol TEXT UNIQUE NOT NULL,
-            name TEXT NOT NULL,
-            sector TEXT NOT NULL,
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            symbol VARCHAR(255) UNIQUE NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            sector VARCHAR(255) NOT NULL,
             description TEXT,
-            target_price REAL NOT NULL
+            target_price DECIMAL(10, 2) NOT NULL
         )
     ''')
-    
+
     # Create commodities table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS commodities (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE NOT NULL,
-            symbol TEXT NOT NULL,
-            commodity_type TEXT NOT NULL,
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) UNIQUE NOT NULL,
+            symbol VARCHAR(255) NOT NULL,
+            commodity_type VARCHAR(255) NOT NULL,
             description TEXT,
-            target_price REAL NOT NULL
+            target_price DECIMAL(10, 2) NOT NULL
         )
     ''')
-    
+
     db.commit()
 
 def populate_default_commodities():
@@ -40,7 +40,7 @@ def populate_default_commodities():
     """
     db = get_db()
     cursor = db.cursor()
-    
+
     cursor.execute('SELECT COUNT(*) FROM commodities')
     if cursor.fetchone()[0] == 0:
         default_commodities = [
@@ -58,7 +58,7 @@ def populate_default_commodities():
         cursor.executemany('''
             INSERT INTO commodities 
             (name, symbol, commodity_type, description, target_price) 
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
         ''', default_commodities)
         
         db.commit()

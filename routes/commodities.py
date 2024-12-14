@@ -64,7 +64,12 @@ def commodity_add():
         except Exception as e:
             return render_template('add_commodity.html', error=str(e))
     
-    return render_template('add_commodity.html')
+    commodity_types = fetch_commodity_types()
+    return render_template('add_commodity.html', commodity_types=commodity_types)
+
+def fetch_commodity_types():
+    """Fetch available commodity types from the database or return a predefined list."""
+    return ["", "Energy", "Metals", "Agriculture", "Livestock"]
 
 @commodities_bp.route('/delete/<int:commodity_id>', methods=['POST'])
 def commodity_delete(commodity_id):

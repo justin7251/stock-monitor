@@ -46,3 +46,5 @@ RECIPIENT_EMAIL=recipient_email@example.com
 ```bash
 curl -Method Post -Uri "http://localhost:5000/webhook" -Body '{"symbol": "GOOGL", "threshold": 120.75}' -ContentType "application/json"
 ```
+
+ python -m services.api_debug

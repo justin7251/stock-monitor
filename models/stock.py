@@ -112,32 +112,28 @@ class StockModel:
             return "At Target"
     
     def calculate_volatility(self, window: int = 5) -> Optional[float]:
-        """
-        Calculate price volatility based on historical prices
-        
-        :param window: Number of recent prices to consider
-        :return: Volatility percentage or None
-        """
         if len(self.historical_prices) < window:
             return None
-        
+
         recent_prices = [entry['price'] for entry in self.historical_prices[-window:]]
+        n = len(recent_prices)
         
         try:
-            mean_price = sum(recent_prices) / len(recent_prices)
-            variance = sum((price - mean_price) ** 2 for price in recent_prices) / len(recent_prices)
+            mean_price = sum(recent_prices) / n
+            variance = sum((price ** 2 for price in recent_prices)) / n - mean_price ** 2
             volatility = (variance ** 0.5 / mean_price) * 100
             return volatility
         except (TypeError, ZeroDivisionError):
             return None
 
+
 # Utility functions
 def validate_stock_data(data: Dict[str, Any]) -> bool:
-    """
-    Validate stock data before model creation
-    """
     required_fields = ['symbol', 'name', 'sector']
-    return all(data.get(field) for field in required_fields)
+    valid_fields = all(data.get(field) for field in required_fields)
+    numeric_fields = isinstance(data.get('target_price', 0.0), (int, float))
+    return valid_fields and numeric_fields
+
 
 def create_stock(data: Dict[str, Any]) -> Optional[StockModel]:
     """

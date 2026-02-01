@@ -5,3 +5,7 @@ python-dotenv
 pytest
 yfinance
 mysql-connector-python
+pytest-flask
+pytest-cov
+pytest-mock
+freezegun
